@@ -1,4 +1,3 @@
-#include <ruby.h>
 /* Context info */
 enum ctx_stop_reason {CTX_STOP_NONE, CTX_STOP_STEP, CTX_STOP_BREAKPOINT, 
 		      CTX_STOP_CATCHPOINT};
@@ -13,10 +12,19 @@ enum ctx_stop_reason {CTX_STOP_NONE, CTX_STOP_STEP, CTX_STOP_BREAKPOINT,
 #define CTX_FL_ENABLE_BKPT  (1<<7)
 #define CTX_FL_STEPPED      (1<<8)
 #define CTX_FL_FORCE_MOVE   (1<<9)
+#define CTX_FL_CATCHING     (1<<10)
 
 #define CTX_FL_TEST(c,f)  ((c)->flags & (f))
 #define CTX_FL_SET(c,f)   do { (c)->flags |= (f); } while (0)
 #define CTX_FL_UNSET(c,f) do { (c)->flags &= ~(f); } while (0)
+
+typedef struct {
+    struct iseq_catch_table_entry tmp_catch_table;
+    struct iseq_catch_table_entry *old_catch_table;
+    int old_catch_table_size;
+    VALUE mod_name;
+    VALUE errinfo;
+} debug_catch_t;
 
 typedef struct {
     int argc;         /* Number of arguments a frame should have. */
@@ -30,14 +38,16 @@ typedef struct {
     VALUE arg_ary;
     union {
         struct {
-            struct FRAME *frame;
-            struct SCOPE *scope;
-            struct RVarmap *dyna_vars;
+			rb_control_frame_t *cfp;
+			VALUE *bp;
+			struct rb_iseq_struct *block_iseq;
+			VALUE *block_pc;
+            VALUE *last_pc;
         } runtime;
         struct {
             VALUE args;
             VALUE locals;
-	    VALUE arg_ary;
+	        VALUE arg_ary;
         } copy;
     } info;
 } debug_frame_t;
@@ -57,6 +67,7 @@ typedef struct {
     const char * last_file;
     int last_line;
     VALUE breakpoint;
+    debug_catch_t catch_table;
 } debug_context_t;
 
 /* variables in ruby_debug.c */
