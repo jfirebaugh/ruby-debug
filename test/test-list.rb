@@ -7,7 +7,7 @@ require 'test/unit'
 # Test List commands
 class TestList < Test::Unit::TestCase
 
-  @@src_dir = File.dirname(__FILE__)
+  @@src_dir = File.join(Dir.pwd, File.dirname(__FILE__))
 
   require File.join(@@src_dir, 'helper')
   include TestHelper
@@ -19,7 +19,7 @@ class TestList < Test::Unit::TestCase
       script = File.join('data', testname + '.cmd')
       assert_equal(true, 
                    run_debugger(testname, 
-                                "--script #{script} -- gcd.rb 3 5"))
+                                "--script #{script} -- ./gcd.rb 3 5"))
     end
   end
 end

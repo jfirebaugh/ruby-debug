@@ -7,7 +7,7 @@ require 'test/unit'
 # Test Quit command
 class TestQuit < Test::Unit::TestCase
 
-  @@SRC_DIR = File.dirname(__FILE__) unless 
+  @@SRC_DIR = File.join(Dir.pwd, File.dirname(__FILE__)) unless
     defined?(@@SRC_DIR)
 
   require File.join(@@SRC_DIR, 'helper')
@@ -24,7 +24,7 @@ class TestQuit < Test::Unit::TestCase
 #       }
       assert_equal(true, 
                    run_debugger(testname,
-                                "--script #{script} -- null.rb"))
+                                "--script #{script} -- ./null.rb"))
     end
   end
 end

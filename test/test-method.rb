@@ -6,7 +6,7 @@ require 'test/unit'
 
 class TestMethod < Test::Unit::TestCase
 
-  @@SRC_DIR = File.dirname(__FILE__) unless 
+  @@SRC_DIR = File.join(Dir.pwd, File.dirname(__FILE__)) unless
     defined?(@@SRC_DIR)
 
   require File.join(@@SRC_DIR, 'helper')
@@ -18,14 +18,14 @@ class TestMethod < Test::Unit::TestCase
       script = File.join('data', testname + '.cmd')
       assert_equal(true, 
                    run_debugger(testname,
-                                "--script #{script} -- classes.rb"))
+                                "--script #{script} -- ./classes.rb"))
       begin 
         require 'methodsig'
         testname='methodsig'
         script = File.join('data', testname + '.cmd')
         assert_equal(true, 
                      run_debugger(testname,
-                                  "--script #{script} -- classes.rb"))
+                                  "--script #{script} -- ./classes.rb"))
       rescue LoadError
         puts "Skipping method sig test"
       end

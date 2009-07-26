@@ -7,7 +7,7 @@ require 'test/unit'
 # Test --no-stop and $0 setting.
 class TestDollar0 < Test::Unit::TestCase
   
-  @@SRC_DIR = File.dirname(__FILE__) unless 
+  @@SRC_DIR = File.join(Dir.pwd, File.dirname(__FILE__)) unless
     defined?(@@SRC_DIR)
 
   require File.join(@@SRC_DIR, 'helper')
@@ -27,11 +27,6 @@ class TestDollar0 < Test::Unit::TestCase
       assert_equal(true, 
                    run_debugger('dollar-0', 
                                 '-nx --no-stop ./dollar-0.rb',
-                                nil, filter, false, '../bin/rdebug'))
-      # Ruby's __FILE__ seems to prepend ./ when no directory was added.
-      assert_equal(true, 
-                   run_debugger('dollar-0a', 
-                                '-nx --no-stop dollar-0.rb',
                                 nil, filter, false, '../bin/rdebug'))
       # Ruby's __FILE__ seems to prepend ./ when no directory was added.
       assert_equal(true, 
