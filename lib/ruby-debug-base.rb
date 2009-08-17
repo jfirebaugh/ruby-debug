@@ -1,6 +1,6 @@
 require 'ruby_debug.so'
 require 'rubygems'
-require 'linecache'
+require 'linecache19'
 
 module Debugger
   
