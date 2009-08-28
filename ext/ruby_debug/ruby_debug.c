@@ -531,6 +531,10 @@ filename_cmp(VALUE source, char *file)
             return 1;
         if(isdirsep(source_ptr[s]) && isdirsep(file_ptr[f]))
             dirsep_flag = 1;
+#ifdef DOSISH_DRIVE_LETTER
+        else if (s == 0)
+            return(toupper(source_ptr[s]) == toupper(file_ptr[f]));
+#endif
         else if(source_ptr[s] != file_ptr[f])
             return 0;
     }
