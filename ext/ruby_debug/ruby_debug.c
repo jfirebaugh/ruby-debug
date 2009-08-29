@@ -67,7 +67,7 @@ static VALUE create_binding(VALUE);
 static VALUE debug_stop(VALUE);
 static void save_current_position(debug_context_t *);
 static VALUE context_copy_args(debug_frame_t *);
-static VALUE context_copy_locals(debug_frame_t *, VALUE);
+static VALUE context_copy_locals(debug_context_t *,debug_frame_t *, VALUE);
 static void context_suspend_0(debug_context_t *);
 static void context_resume_0(debug_context_t *);
 static void copy_scalar_args(debug_frame_t *);
@@ -411,7 +411,7 @@ debug_context_dup(debug_context_t *debug_context, VALUE self)
         old_frame = &(debug_context->frames[i]);
         new_frame->dead = 1;
         new_frame->info.copy.args = context_copy_args(old_frame);
-        new_frame->info.copy.locals = context_copy_locals(old_frame, self);
+        new_frame->info.copy.locals = context_copy_locals(debug_context, old_frame, self);
     }
     return Data_Wrap_Struct(cContext, debug_context_mark, debug_context_free, new_debug_context);
 }
@@ -1840,7 +1840,7 @@ context_copy_args(debug_frame_t *debug_frame)
 }
 
 static VALUE
-context_copy_locals(debug_frame_t *debug_frame, VALUE self)
+context_copy_locals(debug_context_t *debug_context, debug_frame_t *debug_frame, VALUE self)
 {
     int i;
     rb_control_frame_t *cfp;
@@ -1861,8 +1861,10 @@ context_copy_locals(debug_frame_t *debug_frame, VALUE self)
     iseq = cfp->block_iseq;
     if ((iseq != NULL) && (iseq->local_table != NULL) && (iseq != cfp->iseq))
     {
+        rb_thread_t *th;
         rb_control_frame_t *block_frame = RUBY_VM_NEXT_CONTROL_FRAME(cfp);
-        while (block_frame > (rb_control_frame_t*)GET_THREAD()->stack)
+        Data_Get_Struct(context_thread_0(debug_context), rb_thread_t, th);
+        while (block_frame > (rb_control_frame_t*)th->stack)
         {
             if (block_frame->iseq == cfp->block_iseq)
             {
@@ -1898,7 +1900,7 @@ context_frame_locals(int argc, VALUE *argv, VALUE self)
     if (debug_frame->dead)
         return debug_frame->info.copy.locals;
     else
-        return context_copy_locals(debug_frame, self);
+        return context_copy_locals(debug_context, debug_frame, self);
 }
 
 /*
