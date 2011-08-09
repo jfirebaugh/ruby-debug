@@ -17,13 +17,8 @@ module TestHelper
   def run_debugger(testname, args = '', opts = {})
     Dir.chdir(File.dirname(__FILE__)) do
       rightfile = opts[:rightfile] || File.join('data', "#{testname}.right")
-      outfile   = opts[:outfile]   || "#{testname}.out"
       debug_pgm = opts[:runner]    || 'tdebug.rb'
       filter    = opts[:filter]
-
-      if File.exists?(outfile)
-        FileUtils.rm(outfile)
-      end
 
       ENV['RDEBUG'] = debug_pgm
       ENV['TERM']   = ''
@@ -33,20 +28,14 @@ module TestHelper
       # So turn off EMACS output processing.
       ENV['EMACS'] = ENV['INSIDE_EMACS'] = nil
 
-      cmd = "#{load_ruby} #{load_params} ../rdbg.rb #{args} > #{outfile}"
+      cmd = "#{load_ruby} #{load_params} ../rdbg.rb #{args}"
       puts "'#{cmd}'" if $DEBUG
-      `#{cmd}`
 
-      got_lines     = File.read(outfile).split(/\n/)
+      got_lines     = `#{cmd}`.split(/\n/)
       correct_lines = File.read(rightfile).split(/\n/)
       filter.call(got_lines, correct_lines) if filter
 
-      if cheap_diff(got_lines, correct_lines)
-        FileUtils.rm(outfile)
-        return true
-      end
-
-      false
+      cheap_diff(got_lines, correct_lines)
     end
   end
 
