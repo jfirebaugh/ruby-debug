@@ -135,7 +135,7 @@ inline static void *
 ruby_method_ptr(VALUE class, ID meth_id)
 {
     NODE *body, *method;
-    st_lookup(RCLASS(class)->m_tbl, meth_id, (st_data_t *)&body);
+    st_lookup(RCLASS_M_TBL(class), meth_id, (st_data_t *)&body);
     method = (NODE *)body->u2.value;
     return (void *)method->u1.value;
 }
