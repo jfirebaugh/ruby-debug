@@ -22,5 +22,6 @@ load config_file if File.exist?(config_file)
 
 have_type("rb_event_flag_t")
 have_func("rb_errinfo")
+have_func("rb_binding_new")
 
 create_makefile("ruby_debug")

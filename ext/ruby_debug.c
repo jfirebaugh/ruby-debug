@@ -530,14 +530,15 @@ filename_cmp(VALUE source, char *file)
     return 1;
 }
 
-/*
- * A nasty hack to be able to get at the +Kernel.binding+ method.
- * +rb_f_binding+ is declared static in eval.c. So copy and save our own value
- * of it by looking up the method name in the Kernel module.
- */
 static VALUE
 create_binding(VALUE self)
 {
+#ifndef HAVE_RB_BINDING_NEW
+    /*
+     * A nasty hack to be able to get at the +Kernel.binding+ method.
+     * +rb_f_binding+ is declared static in eval.c. So copy and save our own value
+     * of it by looking up the method name in the Kernel module.
+     */
     typedef VALUE (*bind_func_t)(VALUE);
     static bind_func_t f_binding = NULL;
 
@@ -546,6 +547,9 @@ create_binding(VALUE self)
         f_binding = (bind_func_t)ruby_method_ptr(rb_mKernel, rb_intern("binding"));
     }
     return f_binding(self);
+#else
+    return rb_binding_new();
+#endif
 }
 
 inline static debug_frame_t *
