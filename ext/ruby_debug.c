@@ -465,7 +465,7 @@ call_at_line(VALUE context, debug_context_t *debug_context, VALUE file, VALUE li
 }
 
 static void
-save_call_frame(rb_event_t event, VALUE self, char *file, int line, ID mid, debug_context_t *debug_context)
+save_call_frame(rb_event_flag_t event, VALUE self, char *file, int line, ID mid, debug_context_t *debug_context)
 {
     VALUE binding;
     debug_frame_t *debug_frame;
@@ -567,7 +567,7 @@ save_top_binding(debug_context_t *debug_context, VALUE binding)
 }
 
 inline static void
-set_frame_source(rb_event_t event, debug_context_t *debug_context, VALUE self, char *file, int line, ID mid)
+set_frame_source(rb_event_flag_t event, debug_context_t *debug_context, VALUE self, char *file, int line, ID mid)
 {
     debug_frame_t *top_frame;
     top_frame = get_top_frame(debug_context);
@@ -607,7 +607,7 @@ save_current_position(debug_context_t *debug_context)
 }
 
 inline static char *
-get_event_name(rb_event_t event)
+get_event_name(rb_event_flag_t event)
 {
   switch (event) {
     case RUBY_EVENT_LINE:
@@ -641,7 +641,7 @@ c_call_new_frame_p(VALUE klass, ID mid)
 }
 
 static void
-debug_event_hook(rb_event_t event, NODE *node, VALUE self, ID mid, VALUE klass)
+debug_event_hook(rb_event_flag_t event, NODE *node, VALUE self, ID mid, VALUE klass)
 {
     VALUE thread, context;
     VALUE breakpoint = Qnil, binding = Qnil;

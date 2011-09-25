@@ -1,4 +1,11 @@
 #include <ruby.h>
+
+/* 1.8 defines rb_event_t in node.h rather than rb_event_flag_t in ruby.h */
+#ifndef HAVE_TYPE_RB_EVENT_FLAG_T
+#include <node.h>
+#define rb_event_flag_t rb_event_t
+#endif
+
 /* Context info */
 enum ctx_stop_reason {CTX_STOP_NONE, CTX_STOP_STEP, CTX_STOP_BREAKPOINT, 
 		      CTX_STOP_CATCHPOINT};

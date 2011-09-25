@@ -20,4 +20,6 @@ end
 config_file = File.join(File.dirname(__FILE__), 'config_options.rb')
 load config_file if File.exist?(config_file)
 
+have_type("rb_event_flag_t")
+
 create_makefile("ruby_debug")
