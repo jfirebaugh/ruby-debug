@@ -1,12 +1,17 @@
 #!/usr/bin/env ruby
 require File.expand_path("../helper", __FILE__)
 
-# Test that it's possible to stop at breakpoints in an at_exit block.
 class TestAtExit < Test::Unit::TestCase
   include TestHelper
 
-  def test_basic
+  def test_at_exit_breakpoints
     testname = 'at-exit'
+    script = File.join('data', testname + '.cmd')
+    assert(run_debugger(testname, "--script #{script} -- ./example/at-exit.rb"))
+  end
+
+  def test_debug_at_exit
+    testname = 'debug-at-exit'
     script = File.join('data', testname + '.cmd')
     assert(run_debugger(testname, "--script #{script} -- ./example/at-exit.rb"))
   end

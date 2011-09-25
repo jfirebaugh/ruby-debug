@@ -1,3 +1,7 @@
 at_exit do
-  puts "Hello world!"
+  puts "at_exit"
+end
+
+Debugger.debug_at_exit do
+  puts "debug_at_exit"
 end
