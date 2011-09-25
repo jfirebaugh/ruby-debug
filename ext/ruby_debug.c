@@ -5,42 +5,7 @@
 #include <rubysig.h>
 #include <st.h>
 #include <intern.h>
-
-#ifdef _WIN32
-struct FRAME {
-    VALUE self;
-    int argc;
-    ID last_func;
-    ID orig_func;
-    VALUE last_class;
-    struct FRAME *prev;
-    struct FRAME *tmp;
-    struct RNode *node;
-    int iter;
-    int flags;
-    unsigned long uniq;
-};
-
-struct SCOPE {
-    struct RBasic super;
-    ID *local_tbl;
-    VALUE *local_vars;
-    int flags;
-};
-
-struct RVarmap {
-    struct RBasic super;
-    ID id;
-    VALUE val;
-    struct RVarmap *next;
-};
-
-RUBY_EXTERN struct SCOPE   *ruby_scope;
-RUBY_EXTERN struct FRAME   *ruby_frame;
-RUBY_EXTERN struct RVarmap *ruby_dyna_vars;
-#else
 #include <env.h>
-#endif
 
 #define FRAME_N(n)  (&debug_context->frames[debug_context->stack_size-(n)-1])
 #define GET_FRAME   (FRAME_N(check_frame_number(debug_context, frame)))
