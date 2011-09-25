@@ -448,8 +448,8 @@ static VALUE
 call_at_line_unprotected(VALUE args)
 {
     VALUE context;
-    context = *RARRAY(args)->ptr;
-    return rb_funcall2(context, idAtLine, RARRAY(args)->len - 1, RARRAY(args)->ptr + 1);
+    context = *RARRAY_PTR(args);
+    return rb_funcall2(context, idAtLine, RARRAY_LEN(args) - 1, RARRAY_PTR(args) + 1);
 }
 
 static VALUE
@@ -511,11 +511,11 @@ filename_cmp(VALUE source, char *file)
     int s,f;
     int dirsep_flag = 0;
 
-    s_len = RSTRING(source)->len;
+    s_len = RSTRING_LEN(source);
     f_len = strlen(file);
     min_len = min(s_len, f_len);
 
-    source_ptr = RSTRING(source)->ptr;
+    source_ptr = RSTRING_PTR(source);
     file_ptr   = file;
 
     for( s = s_len - 1, f = f_len - 1; s >= s_len - min_len && f >= f_len - min_len; s--, f-- )
@@ -912,7 +912,7 @@ debug_event_hook(rb_event_t event, NODE *node, VALUE self, ID mid, VALUE klass)
             break;
 
         ancestors = rb_mod_ancestors(expn_class);
-        for(i = 0; i < RARRAY(ancestors)->len; i++)
+        for(i = 0; i < RARRAY_LEN(ancestors); i++)
         {
             VALUE mod_name;
             VALUE hit_count;
@@ -1155,7 +1155,7 @@ debug_contexts(VALUE self)
 
     new_list = rb_ary_new();
     list = rb_funcall(rb_cThread, idList, 0);
-    for(i = 0; i < RARRAY(list)->len; i++)
+    for(i = 0; i < RARRAY_LEN(list); i++)
     {
         thread = rb_ary_entry(list, i);
         thread_context_lookup(thread, &context, NULL);
@@ -1163,7 +1163,7 @@ debug_contexts(VALUE self)
     }
     threads_table_clear(rdebug_threads_tbl);
     Data_Get_Struct(rdebug_threads_tbl, threads_table_t, threads_table);
-    for(i = 0; i < RARRAY(new_list)->len; i++)
+    for(i = 0; i < RARRAY_LEN(new_list); i++)
     {
         context = rb_ary_entry(new_list, i);
         Data_Get_Struct(context, debug_context_t, debug_context);
@@ -1195,7 +1195,7 @@ debug_suspend(VALUE self)
     context_list = debug_contexts(self);
     thread_context_lookup(rb_thread_current(), &current, NULL);
 
-    for(i = 0; i < RARRAY(context_list)->len; i++)
+    for(i = 0; i < RARRAY_LEN(context_list); i++)
     {
         context = rb_ary_entry(context_list, i);
         if(current == context)
@@ -1233,7 +1233,7 @@ debug_resume(VALUE self)
     context_list = debug_contexts(self);
 
     thread_context_lookup(rb_thread_current(), &current, NULL);
-    for(i = 0; i < RARRAY(context_list)->len; i++)
+    for(i = 0; i < RARRAY_LEN(context_list); i++)
     {
         context = rb_ary_entry(context_list, i);
         if(current == context)
@@ -1406,7 +1406,7 @@ debug_debug_load(int argc, VALUE *argv, VALUE self)
     if(RTEST(stop))
       debug_context->stop_next = 1;
     /* Initializing $0 to the script's path */
-    ruby_script(RSTRING(file)->ptr);
+    ruby_script(RSTRING_PTR(file));
     rb_load_protect(file, 0, &state);
     if (0 != state) {
       VALUE errinfo = ruby_errinfo;
