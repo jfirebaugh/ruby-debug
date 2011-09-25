@@ -1,7 +1,7 @@
 source :rubygems
 
 gem "columnize"
-gem "linecache", "~> 0.46"
+gem "linecache", "~> 0.46", :platforms => [:ruby_18, :jruby]
 
 group :development do
   gem "rake"
