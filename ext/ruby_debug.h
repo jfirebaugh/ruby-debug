@@ -6,6 +6,12 @@
 #define rb_event_flag_t rb_event_t
 #endif
 
+/* 1.8 does not provide rb_errinfo() or rb_set_errinfo() */
+#ifndef HAVE_RB_ERRINFO
+static VALUE rb_errinfo(void) { return ruby_errinfo; }
+static void rb_set_errinfo(VALUE value) { ruby_errinfo = value; }
+#endif
+
 /* Context info */
 enum ctx_stop_reason {CTX_STOP_NONE, CTX_STOP_STEP, CTX_STOP_BREAKPOINT, 
 		      CTX_STOP_CATCHPOINT};

@@ -162,7 +162,7 @@ static VALUE
 id2ref_error()
 {
     if(debug == Qtrue)
-      rb_p(ruby_errinfo);
+        rb_p(rb_errinfo());
     return Qnil;
 }
 
@@ -881,13 +881,13 @@ debug_event_hook(rb_event_flag_t event, NODE *node, VALUE self, ID mid, VALUE kl
         if(post_mortem == Qtrue && self)
         {
             binding = create_binding(self);
-            rb_ivar_set(ruby_errinfo, rb_intern("@__debug_file"), rb_str_new2(file));
-            rb_ivar_set(ruby_errinfo, rb_intern("@__debug_line"), INT2FIX(line));
-            rb_ivar_set(ruby_errinfo, rb_intern("@__debug_binding"), binding);
-            rb_ivar_set(ruby_errinfo, rb_intern("@__debug_context"), debug_context_dup(debug_context));
+            rb_ivar_set(rb_errinfo(), rb_intern("@__debug_file"), rb_str_new2(file));
+            rb_ivar_set(rb_errinfo(), rb_intern("@__debug_line"), INT2FIX(line));
+            rb_ivar_set(rb_errinfo(), rb_intern("@__debug_binding"), binding);
+            rb_ivar_set(rb_errinfo(), rb_intern("@__debug_context"), debug_context_dup(debug_context));
         }
 
-        expn_class = rb_obj_class(ruby_errinfo);
+        expn_class = rb_obj_class(rb_errinfo());
 
 	/* This code goes back to the earliest days of ruby-debug. It
 	   tends to disallow catching an exception via the
@@ -931,7 +931,7 @@ debug_event_hook(rb_event_flag_t event, NODE *node, VALUE self, ID mid, VALUE kl
                 hit_count = INT2FIX(c_hit_count);
                 rb_hash_aset(rdebug_catchpoints, mod_name, hit_count);
                 debug_context->stop_reason = CTX_STOP_CATCHPOINT;
-                rb_funcall(context, idAtCatchpoint, 1, ruby_errinfo);
+                rb_funcall(context, idAtCatchpoint, 1, rb_errinfo());
                 if(self && binding == Qnil)
                     binding = create_binding(self);
                 save_top_binding(debug_context, binding);
@@ -1409,10 +1409,10 @@ debug_debug_load(int argc, VALUE *argv, VALUE self)
     ruby_script(RSTRING_PTR(file));
     rb_load_protect(file, 0, &state);
     if (0 != state) {
-      VALUE errinfo = ruby_errinfo;
+      VALUE errinfo = rb_errinfo();
       debug_suspend(self);
       reset_stepping_stop_points(debug_context);
-      ruby_errinfo = Qnil;
+      rb_set_errinfo(Qnil);
       return errinfo;
     }
 
