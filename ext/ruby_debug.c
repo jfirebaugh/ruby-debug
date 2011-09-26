@@ -1,10 +1,19 @@
 #include "ruby_debug.h"
 
-#include <stdio.h>
-#include <node.h>
+#ifdef HAVE_RUBY_ST_H
+#include <ruby/st.h>
+#else
 #include <st.h>
+#endif
+
+#ifdef HAVE_RUBY_INTERN_H
+#include <ruby/intern.h>
+#else
 #include <intern.h>
-#include <env.h>
+#endif
+
+#include <env.h> // ruby_frame, ruby_scope, ruby_dyna_vars
+#include <stdio.h>
 
 #define FRAME_N(n)  (&debug_context->frames[debug_context->stack_size-(n)-1])
 #define GET_FRAME   (FRAME_N(check_frame_number(debug_context, frame)))
