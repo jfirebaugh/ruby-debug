@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include <node.h>
-#include <rubysig.h>
 #include <st.h>
 #include <intern.h>
 #include <env.h>
@@ -1152,15 +1151,12 @@ static VALUE
 debug_suspend(VALUE self)
 {
     VALUE current, context;
-    VALUE saved_crit;
     VALUE context_list;
     debug_context_t *debug_context;
     int i;
 
     debug_check_started();
 
-    saved_crit = rb_thread_critical;
-    rb_thread_critical = Qtrue;
     context_list = debug_contexts(self);
     thread_context_lookup(rb_thread_current(), &current, NULL);
 
@@ -1172,10 +1168,6 @@ debug_suspend(VALUE self)
         Data_Get_Struct(context, debug_context_t, debug_context);
         context_suspend_0(debug_context);
     }
-    rb_thread_critical = saved_crit;
-
-    if(rb_thread_critical == Qfalse)
-        rb_thread_schedule();
 
     return self;
 }
@@ -1197,8 +1189,6 @@ debug_resume(VALUE self)
 
     debug_check_started();
 
-    saved_crit = rb_thread_critical;
-    rb_thread_critical = Qtrue;
     context_list = debug_contexts(self);
 
     thread_context_lookup(rb_thread_current(), &current, NULL);
@@ -1210,7 +1200,6 @@ debug_resume(VALUE self)
         Data_Get_Struct(context, debug_context_t, debug_context);
         context_resume_0(debug_context);
     }
-    rb_thread_critical = saved_crit;
 
     rb_thread_schedule();
 
