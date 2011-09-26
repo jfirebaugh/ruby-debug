@@ -104,15 +104,6 @@ real_class(VALUE klass)
     return klass;
 }
 
-inline static void *
-ruby_method_ptr(VALUE class, ID meth_id)
-{
-    NODE *body, *method;
-    st_lookup(RCLASS_M_TBL(class), meth_id, (st_data_t *)&body);
-    method = (NODE *)body->u2.value;
-    return (void *)method->u1.value;
-}
-
 inline static VALUE
 ref2id(VALUE obj)
 {
@@ -122,13 +113,7 @@ ref2id(VALUE obj)
 static VALUE
 id2ref_unprotected(VALUE id)
 {
-    typedef VALUE (*id2ref_func_t)(VALUE, VALUE);
-    static id2ref_func_t f_id2ref = NULL;
-    if(f_id2ref == NULL)
-    {
-        f_id2ref = (id2ref_func_t)ruby_method_ptr(rb_mObjectSpace, rb_intern("_id2ref"));
-    }
-    return f_id2ref(rb_mObjectSpace, id);
+    return rb_funcall(rb_mObjectSpace, rb_intern("_id2ref"), 1, id);
 }
 
 static VALUE
@@ -252,13 +237,7 @@ threads_table_clear(VALUE table)
 static VALUE
 is_thread_alive(VALUE thread)
 {
-    typedef VALUE (*thread_alive_func_t)(VALUE);
-    static thread_alive_func_t f_thread_alive = NULL;
-    if(!f_thread_alive)
-    {
-        f_thread_alive = (thread_alive_func_t)ruby_method_ptr(rb_cThread, rb_intern("alive?"));
-    }
-    return f_thread_alive(thread);
+    return rb_funcall(thread, rb_intern("alive?"), 0);
 }
 
 static int
@@ -507,19 +486,7 @@ static VALUE
 create_binding(VALUE self)
 {
 #ifndef HAVE_RB_BINDING_NEW
-    /*
-     * A nasty hack to be able to get at the +Kernel.binding+ method.
-     * +rb_f_binding+ is declared static in eval.c. So copy and save our own value
-     * of it by looking up the method name in the Kernel module.
-     */
-    typedef VALUE (*bind_func_t)(VALUE);
-    static bind_func_t f_binding = NULL;
-
-    if(f_binding == NULL)
-    {
-        f_binding = (bind_func_t)ruby_method_ptr(rb_mKernel, rb_intern("binding"));
-    }
-    return f_binding(self);
+    return rb_funcall(self, rb_intern("binding"), 0);
 #else
     return rb_binding_new();
 #endif
