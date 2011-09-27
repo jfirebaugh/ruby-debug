@@ -417,7 +417,7 @@ call_at_line(VALUE context, debug_context_t *debug_context, VALUE file, VALUE li
 }
 
 static void
-save_call_frame(rb_event_flag_t event, VALUE self, char *file, int line, ID mid, debug_context_t *debug_context)
+save_call_frame(rb_event_flag_t event, VALUE self, const char *file, int line, ID mid, debug_context_t *debug_context)
 {
     VALUE binding;
     debug_frame_t *debug_frame;
@@ -456,9 +456,9 @@ save_call_frame(rb_event_flag_t event, VALUE self, char *file, int line, ID mid,
 #endif
 
 int
-filename_cmp(VALUE source, char *file)
+filename_cmp(VALUE source, const char *file)
 {
-    char *source_ptr, *file_ptr;
+    const char *source_ptr, *file_ptr;
     int s_len, f_len, min_len;
     int s,f;
     int dirsep_flag = 0;
@@ -511,7 +511,7 @@ save_top_binding(debug_context_t *debug_context, VALUE binding)
 }
 
 inline static void
-set_frame_source(rb_event_flag_t event, debug_context_t *debug_context, VALUE self, char *file, int line, ID mid)
+set_frame_source(rb_event_flag_t event, debug_context_t *debug_context, VALUE self, const char *file, int line, ID mid)
 {
     debug_frame_t *top_frame;
     top_frame = get_top_frame(debug_context);
@@ -550,7 +550,7 @@ save_current_position(debug_context_t *debug_context)
     CTX_FL_UNSET(debug_context, CTX_FL_FORCE_MOVE);
 }
 
-inline static char *
+inline static const char *
 get_event_name(rb_event_flag_t event)
 {
   switch (event) {
@@ -590,7 +590,7 @@ debug_event_hook(rb_event_flag_t event, NODE *node, VALUE self, ID mid, VALUE kl
     VALUE thread, context;
     VALUE breakpoint = Qnil, binding = Qnil;
     debug_context_t *debug_context;
-    char *file = NULL;
+    const char *file = NULL;
     int line = 0, moved = 0;
 
     hook_count++;
@@ -2074,7 +2074,7 @@ static VALUE
 context_stop_reason(VALUE self)
 {
     debug_context_t *debug_context;
-    char * sym_name;
+    const char * sym_name;
 
     debug_check_started();
 

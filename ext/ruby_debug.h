@@ -79,7 +79,7 @@ extern VALUE rdebug_catchpoints;
 extern VALUE rdebug_threads_tbl;
 
 /* routines in ruby_debug.c */
-extern int  filename_cmp(VALUE source, char *file);
+extern int  filename_cmp(VALUE source, const char *file);
 
 #define IS_STARTED  (rdebug_threads_tbl != Qnil)
 static inline void
@@ -125,7 +125,7 @@ extern int   check_breakpoint_hit_condition(VALUE breakpoint);
 extern VALUE check_breakpoints_by_method(debug_context_t *debug_context, 
     VALUE klass, ID mid, VALUE self);
 extern VALUE check_breakpoints_by_pos(debug_context_t *debug_context, 
-    char *file, int line);
+    const char *file, int line);
 extern VALUE create_breakpoint_from_args(int argc, VALUE *argv, int id);
 extern VALUE context_breakpoint(VALUE self);
 extern VALUE context_set_breakpoint(int argc, VALUE *argv, VALUE self);

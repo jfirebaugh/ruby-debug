@@ -50,7 +50,7 @@ check_breakpoint_hit_condition(VALUE breakpoint)
 }
 
 static int
-check_breakpoint_by_pos(VALUE breakpoint, char *file, int line)
+check_breakpoint_by_pos(VALUE breakpoint, const char *file, int line)
 {
     debug_breakpoint_t *debug_breakpoint;
 
@@ -89,7 +89,7 @@ check_breakpoint_by_method(VALUE breakpoint, VALUE klass, ID mid, VALUE self)
 }
 
 VALUE
-check_breakpoints_by_pos(debug_context_t *debug_context, char *file, int line)
+check_breakpoints_by_pos(debug_context_t *debug_context, const char *file, int line)
 {
     VALUE breakpoint;
     int i;
