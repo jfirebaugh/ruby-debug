@@ -1304,7 +1304,7 @@ debug_set_debug(VALUE self, VALUE value)
 static VALUE
 debug_thread_inherited(VALUE klass)
 {
-  rb_raise(rb_eRuntimeError, "Can't inherite Debugger::DebugThread class");
+  rb_raise(rb_eRuntimeError, "Can't inherit Debugger::DebugThread class");
 }
 
 /*
