@@ -1,5 +1,10 @@
 #include <ruby.h>
 
+#ifdef RUBY_19
+  #include <vm_core.h>
+  #include <iseq.h>
+#endif
+
 /* 1.8 defines rb_event_t in node.h rather than rb_event_flag_t in ruby.h */
 #ifndef HAVE_TYPE_RB_EVENT_FLAG_T
 #include <node.h>
@@ -26,11 +31,13 @@ enum ctx_stop_reason {CTX_STOP_NONE, CTX_STOP_STEP, CTX_STOP_BREAKPOINT,
 #define CTX_FL_ENABLE_BKPT  (1<<7)
 #define CTX_FL_STEPPED      (1<<8)
 #define CTX_FL_FORCE_MOVE   (1<<9)
+#define CTX_FL_CATCHING     (1<<10)
 
 #define CTX_FL_TEST(c,f)  ((c)->flags & (f))
 #define CTX_FL_SET(c,f)   do { (c)->flags |= (f); } while (0)
 #define CTX_FL_UNSET(c,f) do { (c)->flags &= ~(f); } while (0)
 
+#ifndef RUBY_19
 typedef struct {
     int argc;         /* Number of arguments a frame should have. */
     VALUE binding;
@@ -54,6 +61,21 @@ typedef struct {
         } copy;
     } info;
 } debug_frame_t;
+#else /* RUBY_19 */
+typedef struct {
+    struct iseq_catch_table_entry tmp_catch_table;
+    struct iseq_catch_table_entry *old_catch_table;
+    int old_catch_table_size;
+    VALUE mod_name;
+    VALUE errinfo;
+} debug_catch_t;
+
+typedef struct {
+    struct rb_iseq_struct *iseq;
+    struct iseq_catch_table_entry *catch_table;
+    int catch_table_size;
+} iseq_catch_t;
+#endif /* RUBY_19 */
 
 typedef struct {
     VALUE thread_id;
@@ -64,12 +86,26 @@ typedef struct {
     int dest_frame;
     int stop_line;
     int stop_frame;
+#ifndef RUBY_19
     int stack_size;
     int stack_len;
     debug_frame_t *frames;
+#endif /* ! RUBY_19 */
     const char * last_file;
     int last_line;
     VALUE breakpoint;
+#ifdef RUBY_19
+    debug_catch_t catch_table;
+//
+    rb_control_frame_t *start_cfp;
+    rb_control_frame_t *cur_cfp;
+    rb_control_frame_t *top_cfp;
+//
+    VALUE local_table;
+//
+    rb_control_frame_t **cfp;
+    int stack_size;
+#endif /* RUBY_19 */
 } debug_context_t;
 
 /* variables in ruby_debug.c */
@@ -95,8 +131,16 @@ static inline int
 classname_cmp(VALUE name, VALUE klass)
 {
     VALUE class_name = (Qnil == name) ? rb_str_new2("main") : name;
+#ifndef RUBY_19
     return (klass != Qnil 
 	    && rb_str_cmp(class_name, rb_mod_name(klass)) == 0);
+#else /* RUBY_19 */
+    VALUE mod_name;
+    if (klass == Qnil) return(0);
+    mod_name = rb_mod_name(klass);
+    return (mod_name != Qnil 
+	    && rb_str_cmp(class_name, mod_name) == 0);
+#endif /* RUBY_19 */
 }
 
 /* Breakpoint information */

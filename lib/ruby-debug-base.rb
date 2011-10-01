@@ -1,6 +1,11 @@
 require 'ruby_debug'
 require 'ruby-debug/version'
-require 'linecache'
+
+if RUBY_VERSION >= "1.9.0"
+  require 'linecache19'
+else
+  require 'linecache'
+end
 
 module Debugger
   
@@ -254,7 +259,11 @@ module Kernel
   #
   def binding_n(n = 0)
     Debugger.skip do
-      Debugger.current_context.frame_binding(n+2)
+      if RUBY_VERSION < "1.9"
+        Debugger.current_context.frame_binding(n+2)
+      else
+        Debugger.current_context.frame_binding(n)
+      end
     end
   end
 end
