@@ -701,16 +701,22 @@ c_call_new_frame_p(VALUE klass, ID mid)
     return 0;
 }
 
-#ifdef RUBY_19
 static void
 call_at_line_check(VALUE self, debug_context_t *debug_context, VALUE breakpoint, VALUE context, const char *file, int line)
 {
+#ifndef RUBY_19
+    VALUE binding = self? create_binding(self) : Qnil;
+    save_top_binding(debug_context, binding);
+#else
+    VALUE binding = rb_binding_new();
+#endif
+
     debug_context->stop_reason = CTX_STOP_STEP;
 
     /* check breakpoint expression */
     if(breakpoint != Qnil)
     {
-        if(!check_breakpoint_expression(breakpoint, rb_binding_new()))
+        if(!check_breakpoint_expression(breakpoint, binding))
             return;
         if(!check_breakpoint_hit_condition(breakpoint))
             return;
@@ -727,6 +733,7 @@ call_at_line_check(VALUE self, debug_context_t *debug_context, VALUE breakpoint,
     call_at_line(context, debug_context, rb_str_new2(file), INT2FIX(line));
 }
 
+#ifdef RUBY_19
 static int
 set_thread_event_flag_i(st_data_t key, st_data_t val, st_data_t flag)
 {
@@ -997,33 +1004,7 @@ debug_event_hook(rb_event_flag_t event, VALUE data, VALUE self, ID mid, VALUE kl
         if(debug_context->stop_next == 0 || debug_context->stop_line == 0 ||
             (breakpoint = check_breakpoints_by_pos(debug_context, file, line)) != Qnil)
         {
-#ifndef RUBY_19
-            binding = self? create_binding(self) : Qnil;
-            save_top_binding(debug_context, binding);
-
-            debug_context->stop_reason = CTX_STOP_STEP;
-
-            /* check breakpoint expression */
-            if(breakpoint != Qnil)
-            {
-                if(!check_breakpoint_expression(breakpoint, binding))
-                    break;
-                if(!check_breakpoint_hit_condition(breakpoint))
-                    break;
-                if(breakpoint != debug_context->breakpoint)
-                {
-                  debug_context->stop_reason = CTX_STOP_BREAKPOINT;
-                  rb_funcall(context, idAtBreakpoint, 1, breakpoint);
-                }
-                else
-                    debug_context->breakpoint = Qnil;
-            }
-
-            reset_stepping_stop_points(debug_context);
-            call_at_line(context, debug_context, rb_str_new2(file), INT2FIX(line));
-#else /* RUBY_19 */
             call_at_line_check(self, debug_context, breakpoint, context, file, line);
-#endif /* RUBY_19 */
         }
         break;
     }
