@@ -1042,9 +1042,17 @@ debug_event_hook(rb_event_flag_t event, VALUE data, VALUE self, ID mid, VALUE kl
             call_at_line(context, debug_context, rb_str_new2(file), INT2FIX(line));
 #ifndef RUBY_19
         }
-#endif /* ! RUBY_19 */
         break;
     }
+#else
+           break;
+        }
+        breakpoint = check_breakpoints_by_pos(debug_context, file, line);
+        if (breakpoint != Qnil)
+            call_at_line_check(self, debug_context, breakpoint, context, file, line);
+        break;
+    }
+#endif /* ! RUBY_19 */
 #ifndef RUBY_19
     case RUBY_EVENT_C_CALL:
     {
@@ -1052,13 +1060,9 @@ debug_event_hook(rb_event_flag_t event, VALUE data, VALUE self, ID mid, VALUE kl
             save_call_frame(event, self, file, line, mid, debug_context);
         else
             set_frame_source(event, debug_context, self, file, line, mid);
-#else /* RUBY_19 */
-        breakpoint = check_breakpoints_by_pos(debug_context, file, line);
-        if (breakpoint != Qnil)
-            call_at_line_check(self, debug_context, breakpoint, context, file, line);
-#endif /* RUBY_19 */
         break;
     }
+#endif /* RUBY_19 */
     case RUBY_EVENT_C_RETURN:
     {
         /* note if a block is given we fall through! */
